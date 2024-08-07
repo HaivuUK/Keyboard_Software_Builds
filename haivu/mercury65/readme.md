@@ -9,11 +9,9 @@
 
 Make example for this keyboard (after setting up your build environment):
 
-    make haivu/mercury65:default
+    make haivu/mercury65:vial
 
-Flashing example for this keyboard:
-
-    make haivu/mercury65:default:flash
+    
 ## Bootloader
 
 Resetting Board: Press the button on the PCB next to the spacebar to soft reset the board to reflash (bootloader mode).
