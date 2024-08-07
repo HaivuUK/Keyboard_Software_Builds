@@ -8,11 +8,11 @@ Sofle Rev 1 v2 - with dual OLEDs and encoders
 
 ## Features
 
-### Mercury65
+### Mercury65 - Vial
 
 Basic Vial features only
 
-### Sofle
+### Sofle - Vial
 
 Layer information
 
