@@ -4,18 +4,16 @@
 
 *65% Form Factor with a Separated Arrow Cluster used for Mercury65*
 
-
-* Keyboard Maintainer: [Drewkeys](https://github.com/drewpyun)
 * Hardware Supported: Made specifically for Mercury65, 65% hotswap supported
 * Hardware Availability: https://www.rocketkeyboards.com/collections/mercury65/products/gb-mercury65-keyboard
 
 Make example for this keyboard (after setting up your build environment):
 
-    make drewkeys/mercury65:default
+    make haivu/mercury65:default
 
 Flashing example for this keyboard:
 
-    make drewkeys/mercury65:default:flash
+    make haivu/mercury65:default:flash
 ## Bootloader
 
 Resetting Board: Press the button on the PCB next to the spacebar to soft reset the board to reflash (bootloader mode).
