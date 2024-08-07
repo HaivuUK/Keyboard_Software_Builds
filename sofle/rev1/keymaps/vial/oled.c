@@ -1,0 +1,271 @@
+ /* Copyright 2020 Josef Adamcik
+  * Modification for VIA support and RGB underglow by Jens Bonk-Wiltfang
+  * 
+  * This program is free software: you can redistribute it and/or modify 
+  * it under the terms of the GNU General Public License as published by 
+  * the Free Software Foundation, either version 2 of the License, or 
+  * (at your option) any later version. 
+  * 
+  * This program is distributed in the hope that it will be useful, 
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+  * GNU General Public License for more details. 
+  * 
+  * You should have received a copy of the GNU General Public License 
+  * along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+  */ 
+
+//Sets up what the OLED screens display.
+
+#ifdef OLED_ENABLE
+
+/* KEYBOARD PET START */
+
+/* settings */
+#    define MIN_WALK_SPEED      10
+#    define MIN_RUN_SPEED       40
+
+/* advanced settings */
+#    define ANIM_FRAME_DURATION 200  // how long each frame lasts in ms
+#    define ANIM_SIZE           96   // number of bytes in array. If you change sprites, minimize for adequate firmware size. max is 1024
+
+/* timers */
+uint32_t anim_timer = 0;
+
+/* current frame */
+uint8_t current_frame = 0;
+
+/* status variables */
+int   current_wpm = 0;
+led_t led_usb_state;
+
+bool isSneaking = false;
+bool isJumping  = false;
+bool showedJump = true;
+
+/* logic */
+static void render_luna(int LUNA_X, int LUNA_Y) {
+    /* Sit */
+    static const char PROGMEM sit[2][ANIM_SIZE] = {/* 'sit1', 32x22px */
+                                                   {
+                                                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0x1c, 0x02, 0x05, 0x02, 0x24, 0x04, 0x04, 0x02, 0xa9, 0x1e, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0x10, 0x08, 0x68, 0x10, 0x08, 0x04, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x06, 0x82, 0x7c, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x02, 0x04, 0x0c, 0x10, 0x10, 0x20, 0x20, 0x20, 0x28, 0x3e, 0x1c, 0x20, 0x20, 0x3e, 0x0f, 0x11, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                                   },
+
+                                                   /* 'sit2', 32x22px */
+                                                   {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0x1c, 0x02, 0x05, 0x02, 0x24, 0x04, 0x04, 0x02, 0xa9, 0x1e, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0x90, 0x08, 0x18, 0x60, 0x10, 0x08, 0x04, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x0e, 0x82, 0x7c, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x02, 0x04, 0x0c, 0x10, 0x10, 0x20, 0x20, 0x20, 0x28, 0x3e, 0x1c, 0x20, 0x20, 0x3e, 0x0f, 0x11, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
+
+    /* Walk */
+    static const char PROGMEM walk[2][ANIM_SIZE] = {/* 'walk1', 32x22px */
+                                                    {
+                                                        0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x40, 0x20, 0x10, 0x90, 0x90, 0x90, 0xa0, 0xc0, 0x80, 0x80, 0x80, 0x70, 0x08, 0x14, 0x08, 0x90, 0x10, 0x10, 0x08, 0xa4, 0x78, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0x08, 0xfc, 0x01, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x18, 0xea, 0x10, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x1c, 0x20, 0x20, 0x3c, 0x0f, 0x11, 0x1f, 0x03, 0x06, 0x18, 0x20, 0x20, 0x3c, 0x0c, 0x12, 0x1e, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                                    },
+
+                                                    /* 'walk2', 32x22px */
+                                                    {
+                                                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x40, 0x20, 0x20, 0x20, 0x40, 0x80, 0x00, 0x00, 0x00, 0x00, 0xe0, 0x10, 0x28, 0x10, 0x20, 0x20, 0x20, 0x10, 0x48, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1f, 0x20, 0xf8, 0x02, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x10, 0x30, 0xd5, 0x20, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0x20, 0x30, 0x0c, 0x02, 0x05, 0x09, 0x12, 0x1e, 0x02, 0x1c, 0x14, 0x08, 0x10, 0x20, 0x2c, 0x32, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                                    }};
+
+    /* Run */
+    static const char PROGMEM run[2][ANIM_SIZE] = {/* 'run1', 32x22px */
+                                                   {
+                                                       0x00, 0x00, 0x00, 0x00, 0xe0, 0x10, 0x08, 0x08, 0xc8, 0xb0, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x40, 0x40, 0x3c, 0x14, 0x04, 0x08, 0x90, 0x18, 0x04, 0x08, 0xb0, 0x40, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x02, 0xc4, 0xa4, 0xfc, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0xc8, 0x58, 0x28, 0x2a, 0x10, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0e, 0x09, 0x04, 0x04, 0x04, 0x04, 0x02, 0x03, 0x02, 0x01, 0x01, 0x02, 0x02, 0x04, 0x08, 0x10, 0x26, 0x2b, 0x32, 0x04, 0x05, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                                   },
+
+                                                   /* 'run2', 32x22px */
+                                                   {
+                                                       0x00, 0x00, 0x00, 0xe0, 0x10, 0x10, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x80, 0x80, 0x78, 0x28, 0x08, 0x10, 0x20, 0x30, 0x08, 0x10, 0x20, 0x40, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x04, 0x08, 0x10, 0x11, 0xf9, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x10, 0xb0, 0x50, 0x55, 0x20, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x02, 0x0c, 0x10, 0x20, 0x28, 0x37, 0x02, 0x1e, 0x20, 0x20, 0x18, 0x0c, 0x14, 0x1e, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                                   }};
+
+    /* animation */
+    void animate_luna(void) {
+        /* jump */
+        if (isJumping || !showedJump) {
+            /* clear */
+            oled_set_cursor(LUNA_X, LUNA_Y + 2);
+            oled_write("     ", false);
+
+            oled_set_cursor(LUNA_X, LUNA_Y - 1);
+
+            showedJump = true;
+        } else {
+            /* clear */
+            oled_set_cursor(LUNA_X, LUNA_Y - 1);
+            oled_write("     ", false);
+
+            oled_set_cursor(LUNA_X, LUNA_Y);
+        }
+
+        /* switch frame */
+        current_frame = (current_frame + 1) % 2;
+
+        /* current status */
+        if (current_wpm <= MIN_WALK_SPEED) {
+            oled_write_raw_P(sit[current_frame], ANIM_SIZE);
+
+        } else if (current_wpm <= MIN_RUN_SPEED) {
+            oled_write_raw_P(walk[current_frame], ANIM_SIZE);
+
+        } else {
+            oled_write_raw_P(run[current_frame], ANIM_SIZE);
+        }
+    }
+
+#    if OLED_TIMEOUT > 0
+    /* the animation prevents the normal timeout from occuring */
+    if (last_input_activity_elapsed() > OLED_TIMEOUT && last_led_activity_elapsed() > OLED_TIMEOUT) {
+        oled_off();
+        return;
+    } else {
+        oled_on();
+    }
+#    endif
+
+    /* animation timer */
+    if (timer_elapsed32(anim_timer) > ANIM_FRAME_DURATION) {
+        anim_timer = timer_read32();
+        animate_luna();
+    }
+}
+
+/* KEYBOARD PET END */
+
+static void print_logo_narrow(void) {
+    int timer = 0;
+    int x = 31;
+
+    //=============  USER CONFIG PARAMS  ===============
+    float max_wpm = 110.0f; //WPM value at the top of the graph window
+    int graph_refresh_interval = 80; //in milliseconds
+    int graph_area_fill_interval = 2; //determines how dense the horizontal lines under the graph line are; lower = more dense
+    int graph_line_thickness = 1; //determines thickness of graph line in pixels
+    //=============  END USER PARAMS  ===============
+
+    //get current WPM value
+	uint8_t n = get_current_wpm();
+    char wpm_str[4];
+	
+	//check if it's been long enough before refreshing graph
+	if(timer_elapsed(timer) > graph_refresh_interval){
+	
+		// main calculation to plot graph line
+		x = 32 - ((current_wpm / max_wpm) * 32);
+		
+		//first draw actual value line
+		for(int i = 0; i <= graph_line_thickness - 1; i++){
+			oled_write_pixel(1, x + i, true);
+		}
+		
+		//then fill in area below the value line
+        for(int i = 32; i > x; i--){
+            if(i % graph_area_fill_interval == 0){
+                oled_write_pixel(1, i, true);
+            }
+        }
+		
+		//then move the entire graph one pixel to the right
+		oled_pan(false); 
+		
+		//refresh the timer for the next iteration
+		timer = timer_read();
+		
+	}
+	
+	//formatting for triple digit WPM vs double digits, then print WPM readout
+	if(current_wpm > 0){
+		oled_set_cursor(14, 3);
+		oled_write("WPM ", false);
+		oled_set_cursor(18, 3);
+        wpm_str[3] = '\0';
+        wpm_str[2] = '0' + n % 10;
+        wpm_str[1] = '0' + (n /= 10) % 10;
+        wpm_str[0] = '0' + n / 10;
+		oled_write(wpm_str, false);
+	} 
+}
+
+static void print_status_narrow(void) {
+    /* Print current mode */
+    oled_write_P(PSTR("\n\n"), false);
+
+    switch (get_highest_layer(layer_state)) {
+        case 0:
+            oled_write_ln_P(PSTR("QWTY"), false);
+            break;
+        case 1:
+            oled_write_ln_P(PSTR("GAME"), false);
+            break;
+        default:
+            oled_write_P(PSTR("Mod\n"), false);
+            break;
+    }
+
+    oled_write_P(PSTR("\n\n"), false);
+    // Print current layer
+    oled_write_ln_P(PSTR("LAYER"), false);
+    switch (get_highest_layer(layer_state)) {
+        case 0:
+        case 1:
+            oled_write_P(PSTR("Base\n"), false);
+            break;
+        case 2:
+            oled_write_P(PSTR("Raise"), false);
+            break;
+        case 3:
+            oled_write_P(PSTR("Lower"), false);
+            break;
+        default:
+            oled_write_ln_P(PSTR("Undef"), false);
+    }
+    oled_write_P(PSTR("\n\n"), false);
+
+    /* KEYBOARD PET RENDER START */
+
+    render_luna(0, 13);
+
+    /* KEYBOARD PET RENDER END */
+}
+
+oled_rotation_t oled_init_user(oled_rotation_t rotation) {
+    if (is_keyboard_master()) {
+        return OLED_ROTATION_270;
+    } else {
+        return OLED_ROTATION_180;
+    }
+    return rotation;
+}
+
+bool oled_task_user(void) {
+    /* KEYBOARD PET VARIABLES START */
+
+    current_wpm   = get_current_wpm();
+    led_usb_state = host_keyboard_led_state();
+
+    /* KEYBOARD PET VARIABLES END */
+
+    if (is_keyboard_master()) {
+        print_status_narrow();
+    } else {
+        print_logo_narrow();
+    }
+    return false;
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+            /* KEYBOARD PET STATUS START */
+
+        case KC_SPC:
+            if (record->event.pressed) {
+                isJumping  = true;
+                showedJump = false;
+            } else {
+                isJumping = false;
+            }
+            break;
+
+            /* KEYBOARD PET STATUS END */
+    }
+    return true;
+}
+
+#endif
