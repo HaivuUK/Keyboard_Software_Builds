@@ -8,19 +8,14 @@ More details about the keyboard on my blog: [Let me introduce you SofleKeyboard 
 
 The current (temporary) build guide and a build log is available here: [SofleKeyboard build log/guide](https://josef-adamcik.cz/electronics/soflekeyboard-build-log-and-build-guide.html)
 
-* Keyboard Maintainer: [Josef Adamcik](https://josef-adamcik.cz) [Twitter:@josefadamcik](https://twitter.com/josefadamcik)  
 * Hardware Supported: SofleKeyboard PCB, ProMicro  
 * Hardware Availability: [PCB & Case Data](https://github.com/josefadamcik/SofleKeyboard)
 
 Make example for this keyboard (after setting up your build environment):
 
-    make sofle:default
+    make sofle/rev1:vial
 
-Flash the default keymap: 
-
-    make sofle:default:avrdude
-
-Press reset button on he keyboard when asked.
+Press reset button on the keyboard when asked.
 
 Disconnect the first half, connect the second one and repeat the process.
 
