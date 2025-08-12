@@ -4,24 +4,33 @@ Contains the following:
 
 Rocket Keyboards Mercury65
 
-Sofle Rev 1 v2 - with dual OLEDs and encoders
+Sofle Rev 1 v2 - with dual OLEDs and encoders (Elite-C)
+
+(Todo) Corne (Mechboards UK version) - with dual OLEDs and choc switches (RP2040)
+
+(Todo) Ergotravel v1.03 - (RP2040)
 
 ## Features
 
 ### Mercury65 - Vial
 
-Basic Vial features only
+- Basic Vial features only (0.7.1)
 
 ### Sofle - Vial
 
-Layer information
+- Basic Vial features only (0.7.1)
+- Layer information
+- Gaming specific layer
+- Luna the dog with reduced animations
+- WPM graph on the second screen 
+- AUTO shift
+- NKRO
 
-Gaming specific layer
+### Corne - Vial
 
-Luna the dog with reduced animations
+- TODO
+- All VIAL supported features (0.7.5)
 
-WPM graph on the second screen 
+### Ergotravel - Vial
 
-AUTO shift
-
-NKRO
+- All VIAL supported features (0.7.5)
