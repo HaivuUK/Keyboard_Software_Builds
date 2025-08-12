@@ -6,9 +6,9 @@ Rocket Keyboards Mercury65
 
 Sofle Rev 1 v2 - with dual OLEDs and encoders (Elite-C)
 
-(Todo) Corne (Mechboards UK version) - with dual OLEDs and choc switches (RP2040)
+Corne (Mechboards UK version) - with dual OLEDs and choc switches (RP2040)
 
-(Todo) Ergotravel v1.03 - (RP2040)
+Ergotravel v1.03 - (RP2040)
 
 ## Features
 
