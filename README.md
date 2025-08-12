@@ -34,3 +34,7 @@ Ergotravel v1.03 - (RP2040)
 ### Ergotravel - Vial
 
 - All VIAL supported features (0.7.5)
+
+## TODO
+
+- Fix the sofle and mercury65 folders to be better laid out and consistent with the corne and ergotravel file structures in where things are placed and the files they have available.
